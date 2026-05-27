@@ -45,9 +45,8 @@ st.markdown("""
 def rgb_to_hex(rgb):
     return '#%02x%02x%02x' % (int(rgb[0]), int(rgb[1]), int(rgb[2]))
 
-@st.cache_data 
-def get_dominant_colors(_image, k):
-    image = _image.resize((150, 150))
+def get_dominant_colors(image, k):
+    image = image.resize((150, 150))
     img_array = np.array(image)
     pixels = img_array.reshape((-1, 3))
     
