@@ -46,7 +46,7 @@ def rgb_to_hex(rgb):
 def get_dominant_colors_and_model(image, k):
     small_image = image.copy()
     small_image.thumbnail((150, 150))
-    img_array = np.array(small_image)
+    img_array = np.array(small_image, dtype=float) 
     pixels = img_array.reshape((-1, 3))
     
     kmeans = KMeans(n_clusters=k, random_state=42, n_init=10)
@@ -61,7 +61,7 @@ def highlight_color_on_image(image, kmeans, cluster_index):
     display_img = image.copy()
     display_img.thumbnail((500, 500)) 
     
-    img_array = np.array(display_img, dtype=np.float32)
+    img_array = np.array(display_img, dtype=float)
     h, w, c = img_array.shape
     pixels = img_array.reshape((-1, 3))
     
