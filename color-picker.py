@@ -17,6 +17,7 @@ st.markdown("""
     .title-font {
         font-size:40px !important;
         font-weight: bold;
+        color: #2C3E50;
         text-align: center;
         margin-bottom: 0px;
     }
@@ -28,13 +29,6 @@ st.markdown("""
     .icon-spacing {
         margin-right: 8px;
         color: #3498DB;
-    }
-    .hex-text {
-        text-align: center; 
-        font-family: monospace; 
-        font-size: 14px; 
-        margin-top: -10px;
-        white-space: nowrap; /* INI KUNCINYA BIAR TEKS GAK KEPOTONG */
     }
     </style>
 """, unsafe_allow_html=True)
@@ -91,7 +85,8 @@ uploaded_file = st.file_uploader("", type=["jpg", "jpeg", "png"])
 if uploaded_file is not None:
     image = Image.open(uploaded_file).convert('RGB')
     
-    col1, col2 = st.columns([1, 1.2]) 
+    # Bagian Kolom disesuaikan agar gambar dan palet lebih rapi
+    col1, col2 = st.columns([1, 1]) 
     
     with col1:
         st.markdown('**<i class="fas fa-image icon-spacing"></i> Gambar Asli:**', unsafe_allow_html=True)
@@ -103,12 +98,20 @@ if uploaded_file is not None:
             try:
                 dominant_colors, trained_kmeans = get_dominant_colors_and_model(image, k=k_value)
                 
-                color_cols = st.columns(k_value)
-                for i, col in enumerate(color_cols):
-                    with col:
-                        st.color_picker(f"Warna {i+1}", value=dominant_colors[i], key=f"cp_{i}", label_visibility="collapsed", disabled=True)
-                        st.markdown(f'<p class="hex-text">{dominant_colors[i]}</p>', unsafe_allow_html=True)
+                # --- FIX UTAMA: GENERATE KOTAK WARNA PAKAI HTML FLEXBOX ---
+                # Ini menghindari bug Session State Streamlit & text yang menumpuk
+                palette_html = '<div style="display: flex; flex-wrap: wrap; gap: 12px; justify-content: flex-start; margin-bottom: 20px;">'
+                for hex_code in dominant_colors:
+                    palette_html += f'''
+                        <div style="display: flex; flex-direction: column; align-items: center;">
+                            <div style="width: 50px; height: 50px; background-color: {hex_code}; border-radius: 8px; border: 1px solid #444; box-shadow: 2px 2px 5px rgba(0,0,0,0.2);"></div>
+                            <span style="font-family: monospace; font-size: 13px; margin-top: 5px;">{hex_code}</span>
+                        </div>
+                    '''
+                palette_html += '</div>'
                 
+                # Tampilkan HTML-nya
+                st.markdown(palette_html, unsafe_allow_html=True)
                 st.success("Ekstraksi selesai!")
                 
             except Exception as e:
@@ -123,7 +126,6 @@ if uploaded_file is not None:
     selected_option = st.radio("Pilih Warna:", options, horizontal=True, label_visibility="collapsed")
     
     selected_index = options.index(selected_option)
-    
     highlighted_result = highlight_color_on_image(image, trained_kmeans, selected_index)
     
     mid_col1, mid_col2, mid_col3 = st.columns([1, 2, 1])
