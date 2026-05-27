@@ -4,10 +4,16 @@ from PIL import Image
 from sklearn.cluster import KMeans
 
 # Konfigurasi Halaman
-st.set_page_config(page_title="PaletteGen | K-Means", page_icon="🎨", layout="centered")
+st.set_page_config(
+    page_title="PaletteGen | K-Means", 
+    page_icon="https://cdn-icons-png.flaticon.com/512/2916/2916315.png", 
+    layout="centered"
+)
 
 # Custom CSS
 st.markdown("""
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
     .title-font {
         font-size:40px !important;
@@ -21,14 +27,9 @@ st.markdown("""
         color: #7F8C8D;
         margin-bottom: 30px;
     }
-    .stButton>button {
-        width: 100%;
-        border-radius: 20px;
-        background-color: #3498DB;
-        color: white;
-    }
-    .stButton>button:hover {
-        background-color: #2980B9;
+    .icon-spacing {
+        margin-right: 8px;
+        color: #3498DB;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -37,12 +38,10 @@ def rgb_to_hex(rgb):
     return '#%02x%02x%02x' % (int(rgb[0]), int(rgb[1]), int(rgb[2]))
 
 @st.cache_data 
-def get_dominant_colors(image, k):
-    # Resize gambar
-    image = image.resize((150, 150))
+def get_dominant_colors(_image, k):
+    image = _image.resize((150, 150))
     img_array = np.array(image)
     
-    # Reshape ke 2D array untuk K-Means
     pixels = img_array.reshape((-1, 3))
     
     kmeans = KMeans(n_clusters=k, random_state=42, n_init=10)
@@ -54,20 +53,21 @@ def get_dominant_colors(image, k):
     return hex_colors
 
 
-st.markdown('<p class="title-font">🎨 Image Color Extractor</p>', unsafe_allow_html=True)
+st.markdown('<p class="title-font"><i class="fas fa-palette icon-spacing"></i> Image Color Extractor</p>', unsafe_allow_html=True)
 st.markdown('<p class="subtitle-font">Temukan palet warna dominan dari gambarmu menggunakan K-Means Clustering!</p>', unsafe_allow_html=True)
 
 with st.sidebar:
-    st.header("⚙️ Pengaturan")
+    st.markdown('<h3><i class="fas fa-sliders-h icon-spacing"></i> Pengaturan</h3>', unsafe_allow_html=True)
     k_value = st.slider("Jumlah Warna Dominan (K)", min_value=2, max_value=8, value=5)
     
     st.markdown("---")
-    st.markdown("### 🧠 Cara Kerja (Behind the Scene)")
+    st.markdown('<h4><i class="fas fa-microchip icon-spacing"></i> Cara Kerja</h4>', unsafe_allow_html=True)
     st.write("Aplikasi ini menggunakan algoritma **K-Means Clustering** dari library `scikit-learn`.")
     st.write("Setiap pixel dalam gambar dianggap sebagai data point. Algoritma akan mengelompokkan pixel-pixel tersebut ke dalam `K` cluster berdasarkan kedekatan warna (Euclidean distance).")
-    st.caption("Dibuat untuk Tugas AI - Bakti Champions 2026")
+    st.caption("Valensius Alven - 140810240059")
 
-uploaded_file = st.file_uploader("📂 Upload Gambar Kamu di Sini", type=["jpg", "jpeg", "png"])
+st.markdown('<p style="font-weight: bold;"><i class="fas fa-upload icon-spacing"></i> Upload Gambar Kamu di Sini</p>', unsafe_allow_html=True)
+uploaded_file = st.file_uploader("", type=["jpg", "jpeg", "png"])
 
 if uploaded_file is not None:
     image = Image.open(uploaded_file)
@@ -75,12 +75,12 @@ if uploaded_file is not None:
     col1, col2 = st.columns([1, 1])
     
     with col1:
-        st.markdown("**🖼️ Gambar Asli:**")
-        st.image(image, use_column_width=True, width=300)
+        st.markdown('**<i class="fas fa-image icon-spacing"></i> Gambar Asli:**', unsafe_allow_html=True)
+        st.image(image, use_column_width=True)
     
     with col2:
-        st.markdown("**🎨 Hasil Palet Warna:**")
-        with st.spinner("Mesin K-Means sedang berpikir... 🤖"):
+        st.markdown('**<i class="fas fa-swatchbook icon-spacing"></i> Hasil Palet Warna:**', unsafe_allow_html=True)
+        with st.spinner("Mesin K-Means sedang memproses..."):
             try:
                 dominant_colors = get_dominant_colors(image, k=k_value)
                 
@@ -90,9 +90,9 @@ if uploaded_file is not None:
                         st.color_picker(f"#{i+1}", value=dominant_colors[i], key=i)
                         st.code(dominant_colors[i]) 
                 
-                st.success("Yeay! Berhasil mengekstrak warna.")
+                st.success("Berhasil mengekstrak warna!")
                 
             except Exception as e:
                 st.error(f"Terjadi kesalahan: {e}")
 else:
-    st.info("👆 Silakan upload gambar terlebih dahulu.")
+    st.info("Silakan upload gambar terlebih dahulu untuk memulai ekstraksi warna.")
