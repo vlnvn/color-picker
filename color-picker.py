@@ -2,15 +2,16 @@ import streamlit as st
 import numpy as np
 from PIL import Image
 from sklearn.cluster import KMeans
+import json
 
-# Konfigurasi Halaman
+# 1. Konfigurasi Halaman 
 st.set_page_config(
     page_title="PaletteGen | K-Means", 
     page_icon="https://cdn-icons-png.flaticon.com/512/2916/2916315.png", 
     layout="centered"
 )
 
-# Custom CSS
+# 2. Custom CSS
 st.markdown("""
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -31,6 +32,13 @@ st.markdown("""
         margin-right: 8px;
         color: #3498DB;
     }
+    .hex-text {
+        text-align: center; 
+        font-family: monospace; 
+        font-size: 14px; 
+        margin-top: -10px;
+        color: #333;
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -41,7 +49,6 @@ def rgb_to_hex(rgb):
 def get_dominant_colors(_image, k):
     image = _image.resize((150, 150))
     img_array = np.array(image)
-    
     pixels = img_array.reshape((-1, 3))
     
     kmeans = KMeans(n_clusters=k, random_state=42, n_init=10)
@@ -49,7 +56,6 @@ def get_dominant_colors(_image, k):
     
     centroids = kmeans.cluster_centers_
     hex_colors = [rgb_to_hex(color) for color in centroids]
-    
     return hex_colors
 
 
@@ -66,13 +72,14 @@ with st.sidebar:
     st.write("Setiap pixel dalam gambar dianggap sebagai data point. Algoritma akan mengelompokkan pixel-pixel tersebut ke dalam `K` cluster berdasarkan kedekatan warna (Euclidean distance).")
     st.caption("Valensius Alven - 140810240059")
 
+# Bagian Utama
 st.markdown('<p style="font-weight: bold;"><i class="fas fa-upload icon-spacing"></i> Upload Gambar Kamu di Sini</p>', unsafe_allow_html=True)
 uploaded_file = st.file_uploader("", type=["jpg", "jpeg", "png"])
 
 if uploaded_file is not None:
     image = Image.open(uploaded_file)
     
-    col1, col2 = st.columns([1, 1])
+    col1, col2 = st.columns([1, 1.2])
     
     with col1:
         st.markdown('**<i class="fas fa-image icon-spacing"></i> Gambar Asli:**', unsafe_allow_html=True)
@@ -87,10 +94,32 @@ if uploaded_file is not None:
                 color_cols = st.columns(k_value)
                 for i, col in enumerate(color_cols):
                     with col:
-                        st.color_picker(f"#{i+1}", value=dominant_colors[i], key=i)
-                        st.code(dominant_colors[i]) 
+                        st.color_picker(f"Warna {i+1}", value=dominant_colors[i], key=f"cp_{i}", label_visibility="collapsed")
+                        st.markdown(f'<p class="hex-text">{dominant_colors[i]}</p>', unsafe_allow_html=True)
                 
-                st.success("Berhasil mengekstrak warna!")
+                st.success("Ekstraksi selesai!")
+                st.markdown("---")
+                
+                # Fitur Ekspor Pallete
+                st.markdown('**<i class="fas fa-file-export icon-spacing"></i> Ekspor Palet**', unsafe_allow_html=True)
+                
+                css_data = ":root {\n"
+                for i, hex_code in enumerate(dominant_colors):
+                    css_data += f"  --color-{i+1}: {hex_code};\n"
+                css_data += "}"
+                
+                json_data = json.dumps({"palette": dominant_colors}, indent=4)
+                
+                txt_data = ", ".join(dominant_colors)
+                
+                dl_col1, dl_col2, dl_col3 = st.columns(3)
+                
+                with dl_col1:
+                    st.download_button(label="CSS", data=css_data, file_name="palette.css", mime="text/css", use_container_width=True)
+                with dl_col2:
+                    st.download_button(label="JSON", data=json_data, file_name="palette.json", mime="application/json", use_container_width=True)
+                with dl_col3:
+                    st.download_button(label="TXT", data=txt_data, file_name="palette.txt", mime="text/plain", use_container_width=True)
                 
             except Exception as e:
                 st.error(f"Terjadi kesalahan: {e}")
