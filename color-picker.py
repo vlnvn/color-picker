@@ -99,7 +99,7 @@ if uploaded_file is not None:
                
                 palette_html = '<div style="display: flex; flex-wrap: wrap; gap: 12px; justify-content: flex-start; margin-bottom: 20px;">'
                 for hex_code in dominant_colors:
-                    palette_html += f'<div style="display: flex; flex-direction: column; align-items: center;"><input type="color" value="{hex_code}" disabled style="width: 50px; height: 55px; border: none; border-radius: 8px; background: none; cursor: default;"><span style="font-family: monospace; font-size: 13px; margin-top: 5px;">{hex_code}</span></div>'
+                    palette_html += f'<div style="display: flex; flex-direction: column; align-items: center;"><label style="cursor: pointer;"><input type="color" value="{hex_code}" style="opacity: 0; position: absolute; width: 0; height: 0;"><div style="width: 50px; height: 50px; background-color: {hex_code}; border-radius: 8px; border: 1px solid #444; box-shadow: 2px 2px 5px rgba(0,0,0,0.2);"></div></label><span style="font-family: monospace; font-size: 13px; margin-top: 5px;">{hex_code}</span></div>'
                 palette_html += '</div>'
                 
                 st.markdown(palette_html, unsafe_allow_html=True)
