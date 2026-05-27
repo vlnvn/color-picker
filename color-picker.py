@@ -85,7 +85,6 @@ uploaded_file = st.file_uploader("", type=["jpg", "jpeg", "png"])
 if uploaded_file is not None:
     image = Image.open(uploaded_file).convert('RGB')
     
-    # Bagian Kolom disesuaikan agar gambar dan palet lebih rapi
     col1, col2 = st.columns([1, 1]) 
     
     with col1:
@@ -97,20 +96,12 @@ if uploaded_file is not None:
         with st.spinner("Mesin K-Means sedang memproses..."):
             try:
                 dominant_colors, trained_kmeans = get_dominant_colors_and_model(image, k=k_value)
-                
-                # --- FIX UTAMA: GENERATE KOTAK WARNA PAKAI HTML FLEXBOX ---
-                # Ini menghindari bug Session State Streamlit & text yang menumpuk
+               
                 palette_html = '<div style="display: flex; flex-wrap: wrap; gap: 12px; justify-content: flex-start; margin-bottom: 20px;">'
                 for hex_code in dominant_colors:
-                    palette_html += f'''
-                        <div style="display: flex; flex-direction: column; align-items: center;">
-                            <div style="width: 50px; height: 50px; background-color: {hex_code}; border-radius: 8px; border: 1px solid #444; box-shadow: 2px 2px 5px rgba(0,0,0,0.2);"></div>
-                            <span style="font-family: monospace; font-size: 13px; margin-top: 5px;">{hex_code}</span>
-                        </div>
-                    '''
+                    palette_html += f'<div style="display: flex; flex-direction: column; align-items: center;"><div style="width: 50px; height: 50px; background-color: {hex_code}; border-radius: 8px; border: 1px solid #444; box-shadow: 2px 2px 5px rgba(0,0,0,0.2);"></div><span style="font-family: monospace; font-size: 13px; margin-top: 5px;">{hex_code}</span></div>'
                 palette_html += '</div>'
                 
-                # Tampilkan HTML-nya
                 st.markdown(palette_html, unsafe_allow_html=True)
                 st.success("Ekstraksi selesai!")
                 
