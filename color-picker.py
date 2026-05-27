@@ -17,7 +17,6 @@ st.markdown("""
     .title-font {
         font-size:40px !important;
         font-weight: bold;
-        color: #2C3E50;
         text-align: center;
         margin-bottom: 0px;
     }
@@ -35,7 +34,7 @@ st.markdown("""
         font-family: monospace; 
         font-size: 14px; 
         margin-top: -10px;
-        color: #333;
+        white-space: nowrap; /* INI KUNCINYA BIAR TEKS GAK KEPOTONG */
     }
     </style>
 """, unsafe_allow_html=True)
